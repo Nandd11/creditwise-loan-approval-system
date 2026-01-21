@@ -25,6 +25,10 @@ Each row represents one loan applicant with multiple features.
 **Target column**
 - `Loan_Approved` → `Yes` / `No`
 
+**Model Saving Code
+   import joblib
+   joblib.dump(best_model, "models/loan_model.pkl")
+
 **Key Features**
 - Applicant income & co-applicant income
 - Credit score, existing loans, DTI ratio
@@ -63,20 +67,11 @@ Each row represents one loan applicant with multiple features.
 
 ## 📂 Repository Structure
 ```
-creditwise-loan-approval-system/
-│── credit_wise.ipynb
-│── loan_approval_data.csv
-│── CreditWise Loan System.pdf
-│── README.md
-│── requirements.txt
-│── app.py
-│── .gitignore
-│
 ├── assets/
-│   ├── (add images here: confusion_matrix.png, roc_curve.png)
-│
+│   ├── confusion_matrix.png
+│   ├── roc_curve.png
 └── models/
-    └── loan_model.pkl   (generated after training)
+    └── loan_model.pkl
 ```
 
 ---
