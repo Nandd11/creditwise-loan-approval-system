@@ -1,116 +1,67 @@
-# CreditWise Loan Approval Prediction System 🏦📊
+# 🏦 CreditWise: Intelligent Loan Approval System
 
-An end-to-end Machine Learning project that predicts whether a customer’s loan should be **Approved** or **Rejected** based on financial, credit, and demographic details.
+An end-to-end Machine Learning production pipeline and interactive dashboard designed to automate credit risk assessment for **SecureTrust Bank**. 
 
-This project is inspired by a real-world problem scenario where a bank faces delays and bias due to manual loan verification. The goal is to build a fast, accurate, and consistent ML-based approval assistant.
+Manual verification processes are time-consuming and prone to human bias, leading to financial or business losses. This system serves as a fast, data-driven approval assistant to predict loan viability before final human review.
 
 ---
 
 ## 🚀 Problem Statement
-A mid-sized financial company (SecureTrust Bank) receives hundreds of loan applications daily. The manual verification process is:
-- Time-consuming
-- Biased and inconsistent
+SecureTrust Bank receives hundreds of applications daily. Manual processing creates structural bottlenecks:
+* **Good customers rejected** $\rightarrow$ Immediate business loss.
+* **High-risk customers approved** $\rightarrow$ Financial defaults and capital loss.
 
-This leads to:
-1. Good customers rejected → business loss  
-2. High-risk customers approved → financial loss  
-
-So we build an **ML-powered intelligent loan approval system** to predict approval status before final human review.
+**Our Solution:** An automated ML-powered system predicting loan approval status instantly based on financial, credit, and demographic markers.
 
 ---
 
-## 📌 Dataset Overview
-Each row represents one loan applicant with multiple features.
+## 📊 Performance Summary & Visuals
+* **Overall Accuracy:** 95.3%
+* **Model Engine:** Random Forest Classifier (100 estimators)
+* **Data Cleansing:** Fully automated pipeline handling missing entry imputation (median/mode) and standard features scaling.
 
-**Target column**
-- `Loan_Approved` → `Yes` / `No`
-
-**Model Saving Code
-   import joblib
-   joblib.dump(best_model, "models/loan_model.pkl")
-
-**Key Features**
-- Applicant income & co-applicant income
-- Credit score, existing loans, DTI ratio
-- Employment status, age, marital status, dependents
-- Savings, collateral value, loan amount, loan term
-- Property area, education level, gender, employer category
-
-(Full column descriptions are available in `CreditWise Loan System.pdf`)
+*Graphs and evaluation curves (Confusion Matrix, ROC-AUC) are securely cataloged in the `assets/` directory.*
 
 ---
 
-## 🔍 Project Workflow
-1. **Data Cleaning**
-2. **EDA (Exploratory Data Analysis)**
-3. **Feature Engineering**
-4. **Model Training**
-   - Logistic Regression
-   - KNN
-   - Naive Bayes
-   - Decision Tree
-   - Random Forest
-5. **Evaluation**
-   - Accuracy, Precision, Recall, F1 Score
-   - Confusion Matrix
-   - ROC-AUC
+## 📌 Dataset & Key Features
+The system processes applicant data using the following metrics to predict the target variable (`Loan_Approved`):
+* **Financial Details:** Applicant Income, Co-applicant Income, DTI Ratio, Savings, Collateral Value, Loan Amount, Loan Term.
+* **Credit History:** Credit Score, Existing Loans.
+* **Demographics:** Employment Status, Age, Marital Status, Dependents, Property Area, Education Level, Gender, Employer Category.
 
 ---
 
-## 🛠 Tech Stack
-- Python
-- Pandas, NumPy
-- Matplotlib, Seaborn
-- Scikit-learn
+## 📁 Repository Structure
+```text
+├── assets/                 # Evaluation plots (Confusion Matrix, ROC Curve)
+├── data/                   # Secure vault for source datasets
+├── models/                 # Saved production weights (loan_model.pkl, loan_scaler.pkl)
+├── notebooks/              # Playground for exploratory data analysis (EDA)
+├── src/
+│   ├── preprocess.py       # Modular data engineering and encoding script
+│   └── train.py           # Automated model training and evaluation script
+└── app.py                  # Live Streamlit application file
+⚙️ How to Run Locally
+1. Initialize and Activate Virtual Environment
+Bash
+python -m venv venv
+.\venv\Scripts\activate
 
----
+2. Install Project Dependencies
+Bash
+pip install streamlit pandas scikit-learn joblib
 
-## 📂 Repository Structure
-```
-├── assets/
-│   ├── confusion_matrix.png
-│   ├── roc_curve.png
-└── models/
-    └── loan_model.pkl
-```
+3. Execute the Automated ML Training Pipeline
+Bash
+python src/train.py
 
----
+4. Boot Up the Interactive Dashboard Demo
+Bash
+python -m streamlit run app.py
+✅ Future Enhancements
+Incorporate advanced hyperparameter tuning (GridSearchCV).
 
-## ⚙️ How to Run Locally
+Integrate model explainability frameworks (SHAP) to debug feature weights.
 
-### 1) Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 2) Run notebook
-```bash
-jupyter notebook
-```
-
-### 3) Run Streamlit demo (optional)
-```bash
-streamlit run app.py
-```
-
----
-
-
----
-
-## 📊 Visuals
-
-![Confusion Matrix](assets/confusion_matrix.png)
-
-![ROC Curve](assets/roc_curve.png)
-
-## ✅ Future Improvements
-- Hyperparameter tuning (GridSearchCV)
-- Model explainability (SHAP)
-- Deploy as web app (Streamlit/Flask)
-
----
-
-## 👤 Author
-**NAND PATEL**  
-GitHub: https://github.com/Nandd11
+Deploy the live dashboard to public cloud environments.
