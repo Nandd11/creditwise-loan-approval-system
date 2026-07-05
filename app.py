@@ -1,64 +1,77 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 import joblib
-from pathlib import Path
+import os
 
-st.set_page_config(page_title="CreditWise Loan Approval", page_icon="🏦", layout="centered")
+# Set up page configurations
+st.set_page_config(page_title="CreditWise - Loan Eligibility Panel", layout="centered")
 
-st.title("🏦 CreditWise Loan Approval Predictor")
-st.write("Enter applicant details to predict whether the loan will be approved.")
-
-MODEL_PATH = Path("models/loan_model.pkl")
-
+# Load model and scaler safely
 @st.cache_resource
-def load_model():
-    if MODEL_PATH.exists():
-        return joblib.load(MODEL_PATH)
-    return None
+def load_artifacts():
+    model = joblib.load("models/loan_model.pkl")
+    scaler = joblib.load("models/loan_scaler.pkl")
+    return model, scaler
 
-model = load_model()
+try:
+    model, scaler = load_artifacts()
+    
+    st.title("🏦 CreditWise Loan Approval System")
+    st.markdown("Enter the applicant's financial profiles below to instantly check loan eligibility eligibility indicators.")
+    st.write("---")
 
-st.info("Tip: Train and export the best model from the notebook to `models/loan_model.pkl` to enable predictions.")
-
-# --- Basic input form (generic) ---
-with st.form("loan_form"):
+    # Creating user inputs matching the dataset columns
     col1, col2 = st.columns(2)
-
+    
     with col1:
-        applicant_income = st.number_input("Applicant Income", min_value=0.0, value=50000.0, step=1000.0)
-        coapp_income = st.number_input("Co-applicant Income", min_value=0.0, value=0.0, step=1000.0)
-        loan_amount = st.number_input("Loan Amount", min_value=0.0, value=200000.0, step=5000.0)
-        loan_term = st.number_input("Loan Term (months)", min_value=1, value=360, step=12)
-
+        applicant_income = st.number_input("Applicant Monthly Income ($)", min_value=0, value=5000)
+        coapplicant_income = st.number_input("Co-applicant Monthly Income ($)", min_value=0, value=0)
+        credit_score = st.number_input("Credit Score", min_value=300, max_value=850, value=700)
+        loan_amount = st.number_input("Requested Loan Amount ($)", min_value=0, value=150000)
+        
     with col2:
-        credit_score = st.number_input("Credit Score", min_value=300, max_value=900, value=720, step=1)
-        dti = st.number_input("DTI Ratio", min_value=0.0, max_value=1.0, value=0.25, step=0.01)
-        dependents = st.number_input("Dependents", min_value=0, max_value=10, value=0, step=1)
-        employment_years = st.number_input("Employment Years", min_value=0, max_value=50, value=3, step=1)
+        age = st.number_input("Applicant Age", min_value=18, max_value=100, value=30)
+        existing_loans = st.number_input("Number of Existing Loans", min_value=0, value=0)
+        dti_ratio = st.slider("Debt-to-Income (DTI) Ratio", min_value=0.0, max_value=1.0, value=0.3, step=0.01)
+        loan_term = st.selectbox("Loan Term (Months)", [360, 180, 120, 60])
 
-    submitted = st.form_submit_button("Predict")
+    # Let's group remaining default features behind the scenes for simplicity
+    st.write("---")
+    
+    if st.button("Evaluate Loan Application", type="primary"):
+        # Structure payload to match model feature columns
+        input_data = pd.DataFrame([{
+            'Applicant_Income': applicant_income,
+            'Coapplicant_Income': coapplicant_income,
+            'Age': age,
+            'Credit_Score': credit_score,
+            'Existing_Loans': existing_loans,
+            'DTI_Ratio': dti_ratio,
+            'Loan_Amount': loan_amount,
+            'Loan_Term': loan_term,
+            # Placeholder/Default flags for cat columns if your random forest requires them
+            'Employment_Status_Unemployed': 0,
+            'Marital_Status_Married': 1,
+            'Property_Area_Urban': 1,
+            'Education_Level_Graduate': 1
+        }])
+        
+        # Keep features order matched to dataset requirements
+        # (The preprocessing step generated the final trained feature index match)
+        model_features = model.feature_names_in_
+        for col in model_features:
+            if col not in input_data.columns:
+                input_data[col] = 0
+        input_data = input_data[model_features]
+        
+        # Scale and predict
+        scaled_input = scaler.transform(input_data)
+        prediction = model.predict(scaled_input)[0]
+        
+        if prediction == 1 or str(prediction).lower() == 'yes':
+            st.success("🎉 **Loan Application Approved!** The applicant matches standard lower-risk margins.")
+        else:
+            st.error("❌ **Loan Application Declined.** Profile metrics indicate higher structural risk patterns.")
 
-if submitted:
-    if model is None:
-        st.error("Model not found. Please train and save a model as `models/loan_model.pkl` from the notebook.")
-    else:
-        # NOTE: Your notebook may use a different feature pipeline.
-        # This simple demo expects the same order/features as training.
-        X = np.array([[applicant_income, coapp_income, loan_amount, loan_term,
-                       credit_score, dti, dependents, employment_years]])
-
-        try:
-            pred = model.predict(X)[0]
-            proba = model.predict_proba(X)[0] if hasattr(model, "predict_proba") else None
-
-            if str(pred).lower() in ["yes", "1", "approved", "true"]:
-                st.success("✅ Prediction: Loan Approved")
-            else:
-                st.warning("❌ Prediction: Loan Rejected")
-
-            if proba is not None and len(proba) >= 2:
-                st.write(f"Approval Probability: **{proba[1]*100:.2f}%**")
-        except Exception as e:
-            st.error("Model exists but input features don't match the training pipeline.")
-            st.code(str(e))
+except FileNotFoundError:
+    st.error("⚠️ **Artifact Mismatch:** Make sure 'loan_model.pkl' and 'loan_scaler.pkl' are inside your local `/models` directory before running the app.")
